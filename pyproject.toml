@@ -6,5 +6,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "google-adk>=1.17.0",
+    "google-cloud-aiplatform>=1.122.0",
+    "google-cloud-storage>=2.19.0",
+    "python-dotenv>=1.1.1",
     "toolbox-core>=0.5.2",
 ]

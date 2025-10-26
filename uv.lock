@@ -23,12 +23,18 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "google-adk" },
+    { name = "google-cloud-aiplatform" },
+    { name = "google-cloud-storage" },
+    { name = "python-dotenv" },
     { name = "toolbox-core" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "google-adk", specifier = ">=1.17.0" },
+    { name = "google-cloud-aiplatform", specifier = ">=1.122.0" },
+    { name = "google-cloud-storage", specifier = ">=2.19.0" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "toolbox-core", specifier = ">=0.5.2" },
 ]
 
