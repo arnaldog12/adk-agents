@@ -23,7 +23,10 @@ qa_engineer = Agent(
     name="qa_engineer",
     model="gemini-2.5-flash",
     description="A QA engineer who is responsible for testing the {generated_code} using Python.",
-    instruction="Test Python code and report any errors or issues.",
+    instruction="""
+    Test Python code and report any errors or issues.
+    Always show the test code you wrote to the user.
+    """,
     tools=[run_python_code],
     output_key="test_results",
 )
