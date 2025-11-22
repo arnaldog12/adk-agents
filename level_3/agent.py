@@ -4,7 +4,7 @@ from google.adk.planners.built_in_planner import BuiltInPlanner
 from google.adk.tools.load_memory_tool import load_memory_tool
 from google.genai.types import ThinkingConfig
 
-from .config import AGENT_MODEL, AGENT_NAME, AGENT_OUTPUT_KEY
+from level_3.config import AGENT_MODEL, AGENT_NAME, AGENT_OUTPUT_KEY
 
 # Local tool imports
 from .tools import corpus_tools, storage_tools
@@ -14,9 +14,9 @@ agent = Agent(
     name=AGENT_NAME,
     model=AGENT_MODEL,
     # ----- SHOW HOW THE PLANNER REDUCES PROMPT LENGTH (ERASE FROM LINE 26 TO 52) -----
-    # planner=BuiltInPlanner(
-    #     thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)
-    # ),
+    planner=BuiltInPlanner(
+        thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)
+    ),
     description="Agent for managing and searching Vertex AI RAG corpora and GCS buckets",
     instruction="""
     You are a helpful assistant that manages and searches RAG corpora in Vertex AI and Google Cloud Storage buckets.

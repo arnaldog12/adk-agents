@@ -20,7 +20,9 @@ from typing import Any, Dict, Optional
 
 import vertexai
 from google.adk.tools import FunctionTool
-from level_4.config import (
+from vertexai.preview import rag
+
+from level_3.config import (
     LOCATION,
     PROJECT_ID,
     RAG_DEFAULT_EMBEDDING_MODEL,
@@ -29,7 +31,6 @@ from level_4.config import (
     RAG_DEFAULT_TOP_K,
     RAG_DEFAULT_VECTOR_DISTANCE_THRESHOLD,
 )
-from vertexai.preview import rag
 
 # Initialize Vertex AI API
 vertexai.init(project=PROJECT_ID, location=LOCATION)
