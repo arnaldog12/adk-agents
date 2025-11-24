@@ -1,18 +1,14 @@
-# ADK core imports
 from google.adk.agents import Agent
 from google.adk.planners.built_in_planner import BuiltInPlanner
 from google.adk.tools.load_memory_tool import load_memory_tool
 from google.genai.types import ThinkingConfig
 
-from level_3.config import AGENT_MODEL, AGENT_NAME, AGENT_OUTPUT_KEY
-
-# Local tool imports
-from .tools import corpus_tools, storage_tools
+from level_3.tools import corpus_tools, storage_tools
 
 # Create the RAG management agent
 agent = Agent(
-    name=AGENT_NAME,
-    model=AGENT_MODEL,
+    name="level_3",
+    model="gemini-2.5-flash",
     # ----- SHOW HOW THE PLANNER REDUCES PROMPT LENGTH (ERASE FROM LINE 26 TO 52) -----
     planner=BuiltInPlanner(
         thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)
@@ -76,8 +72,7 @@ agent = Agent(
         # Memory tool for accessing conversation history
         load_memory_tool,
     ],
-    # Output key automatically saves the agent's final response in state under this key
-    output_key=AGENT_OUTPUT_KEY,
+    output_key="last_response",
 )
 
 root_agent = agent
