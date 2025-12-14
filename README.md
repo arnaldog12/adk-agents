@@ -29,7 +29,7 @@ Change the environment variables in the `.env` file to your own.
 ```bash
 dk web --session_service_uri "sqlite:///./google_adk_agents.db" --memory_service_uri "agentengine://3732274628299587584"
 ```
-### 🤖 Level 1 (Agent + Tools + MCP - NL2SQL)
+### 🧰 Level 1 (Agent + Tools + MCP - NL2SQL)
 
 A bug ticket triage and debugging assistant for **QuantumRoast**, a coffee machine company. This agent demonstrates how to combine function tools, built-in tools (Google Search), and MCP Toolbox for SQL-based ticket management.
 
