@@ -11,3 +11,38 @@ dependencies = [
     "python-dotenv>=1.1.1",
     "toolbox-core>=0.5.2",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.15",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "D",   # pydocstyle
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "PTH", # flake8-use-pathlib
+    "RUF", # Ruff-specific rules
+    "S",   # flake8-bandit
+    "TID", # flake8-tidy-imports
+    "UP",  # pyupgrade
+    "W",   # pycodestyle warnings
+]
+fixable = ["ALL"]
+ignore = ["S102", "RUF001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["praso_agents"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
