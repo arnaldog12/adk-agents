@@ -1,30 +1,26 @@
-"""
-Google Cloud Storage (GCS) Bucket Management Tools for ADK
+"""Google Cloud Storage (GCS) Bucket Management Tools for ADK.
 
 This module provides tools for creating and listing GCS buckets
 to be used with the Agent Development Kit (ADK).
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from google.adk.tools import FunctionTool, ToolContext
 from google.api_core.exceptions import GoogleAPIError
 from google.cloud import storage
-
 from level_3.config import (
     GCS_DEFAULT_CONTENT_TYPE,
     GCS_DEFAULT_LOCATION,
     GCS_DEFAULT_STORAGE_CLASS,
     GCS_LIST_BLOBS_MAX_RESULTS,
     GCS_LIST_BUCKETS_MAX_RESULTS,
-    LOG_FORMAT,
-    LOG_LEVEL,
     PROJECT_ID,
 )
 
 # Configure logging
-logging.basicConfig(level=getattr(logging, LOG_LEVEL), format=LOG_FORMAT)
+logging.basicConfig(level=logging.INFO)
 
 # Initialize the GCS client
 client = storage.Client(project=PROJECT_ID)
@@ -33,11 +29,10 @@ client = storage.Client(project=PROJECT_ID)
 def create_gcs_bucket(
     tool_context: ToolContext,
     bucket_name: str,
-    storage_class: Optional[str] = None,
-    location: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Creates a new Google Cloud Storage bucket.
+    storage_class: str | None = None,
+    location: str | None = None,
+) -> dict[str, Any]:
+    """Creates a new Google Cloud Storage bucket.
 
     Args:
         tool_context: The tool context for ADK
@@ -65,7 +60,7 @@ def create_gcs_bucket(
                 }
         except Exception:
             # Bucket doesn't exist, continue with creation
-            pass
+            logging.info("Bucket %s does not exist, continuing with creation", bucket_name)
 
         # Create the bucket
         bucket = client.bucket(bucket_name)
@@ -91,21 +86,18 @@ def create_gcs_bucket(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to create bucket: {str(e)}",
+            "message": f"Failed to create bucket: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 
-def list_gcs_buckets(
-    prefix: Optional[str] = None, max_results: Optional[int] = None
-) -> Dict[str, Any]:
-    """
-    Lists Google Cloud Storage buckets in the configured project.
+def list_gcs_buckets(prefix: str | None = None, max_results: int | None = None) -> dict[str, Any]:
+    """Lists Google Cloud Storage buckets in the configured project.
 
     Args:
         prefix: Optional prefix to filter buckets by name
@@ -130,12 +122,8 @@ def list_gcs_buckets(
                     "name": bucket.name,
                     "location": bucket.location,
                     "storage_class": bucket.storage_class,
-                    "created": bucket.time_created.isoformat()
-                    if bucket.time_created
-                    else None,
-                    "updated": bucket.updated.isoformat()
-                    if hasattr(bucket, "updated") and bucket.updated
-                    else None,
+                    "created": bucket.time_created.isoformat() if bucket.time_created else None,
+                    "updated": bucket.updated.isoformat() if hasattr(bucket, "updated") and bucket.updated else None,
                 }
             )
 
@@ -143,26 +131,24 @@ def list_gcs_buckets(
             "status": "success",
             "buckets": bucket_list,
             "count": len(bucket_list),
-            "message": f"Found {len(bucket_list)} bucket(s)"
-            + (f" with prefix '{prefix}'" if prefix else ""),
+            "message": f"Found {len(bucket_list)} bucket(s)" + (f" with prefix '{prefix}'" if prefix else ""),
         }
     except GoogleAPIError as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to list buckets: {str(e)}",
+            "message": f"Failed to list buckets: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 
-def get_bucket_details(bucket_name: str) -> Dict[str, Any]:
-    """
-    Gets detailed information about a specific GCS bucket, including a list of all files (blobs).
+def get_bucket_details(bucket_name: str) -> dict[str, Any]:
+    """Gets detailed information about a specific GCS bucket, including a list of all files (blobs).
 
     Args:
         bucket_name: The name of the bucket to get details for
@@ -202,12 +188,8 @@ def get_bucket_details(bucket_name: str) -> Dict[str, Any]:
                 "location": bucket.location,
                 "location_type": bucket.location_type,
                 "storage_class": bucket.storage_class,
-                "created": bucket.time_created.isoformat()
-                if bucket.time_created
-                else None,
-                "updated": bucket.updated.isoformat()
-                if hasattr(bucket, "updated") and bucket.updated
-                else None,
+                "created": bucket.time_created.isoformat() if bucket.time_created else None,
+                "updated": bucket.updated.isoformat() if hasattr(bucket, "updated") and bucket.updated else None,
                 "versioning_enabled": bucket.versioning_enabled,
                 "labels": bucket.labels,
                 "requester_pays": bucket.requester_pays,
@@ -222,24 +204,23 @@ def get_bucket_details(bucket_name: str) -> Dict[str, Any]:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to get bucket details: {str(e)}",
+            "message": f"Failed to get bucket details: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 
 def list_blobs_in_bucket(
     bucket_name: str,
-    prefix: Optional[str] = None,
-    delimiter: Optional[str] = None,
-    max_results: Optional[int] = None,
-) -> Dict[str, Any]:
-    """
-    Lists blobs (files) in a Google Cloud Storage bucket.
+    prefix: str | None = None,
+    delimiter: str | None = None,
+    max_results: int | None = None,
+) -> dict[str, Any]:
+    """Lists blobs (files) in a Google Cloud Storage bucket.
 
     Args:
         bucket_name: The name of the bucket to list blobs from
@@ -257,12 +238,10 @@ def list_blobs_in_bucket(
         client = storage.Client(project=PROJECT_ID)
 
         # Get the bucket
-        bucket = client.bucket(bucket_name)
+        _ = client.bucket(bucket_name)
 
         # List blobs with optional filtering
-        blobs = client.list_blobs(
-            bucket_name, prefix=prefix, delimiter=delimiter, max_results=max_results
-        )
+        blobs = client.list_blobs(bucket_name, prefix=prefix, delimiter=delimiter, max_results=max_results)
 
         # Process the results
         blob_list = []
@@ -299,13 +278,13 @@ def list_blobs_in_bucket(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to list files in bucket: {str(e)}",
+            "message": f"Failed to list files in bucket: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 
@@ -313,11 +292,10 @@ def upload_file_to_gcs(
     tool_context: ToolContext,
     bucket_name: str,
     file_artifact_name: str,
-    destination_blob_name: Optional[str] = None,
-    content_type: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Uploads a file from ADK artifacts to a Google Cloud Storage bucket.
+    destination_blob_name: str | None = None,
+    content_type: str | None = None,
+) -> dict[str, Any]:
+    """Uploads a file from ADK artifacts to a Google Cloud Storage bucket.
 
     Args:
         tool_context: The tool context for ADK
@@ -333,11 +311,7 @@ def upload_file_to_gcs(
         content_type = GCS_DEFAULT_CONTENT_TYPE
     try:
         # Check if user_content contains a PDF attachment
-        if (
-            hasattr(tool_context, "user_content")
-            and tool_context.user_content
-            and tool_context.user_content.parts
-        ):
+        if hasattr(tool_context, "user_content") and tool_context.user_content and tool_context.user_content.parts:
             # Look for any file in parts
             file_data = None
             for part in tool_context.user_content.parts:
@@ -350,10 +324,7 @@ def upload_file_to_gcs(
                 # We found file data in the user message
                 if not destination_blob_name:
                     destination_blob_name = file_artifact_name
-                    if (
-                        content_type == "application/pdf"
-                        and not destination_blob_name.lower().endswith(".pdf")
-                    ):
+                    if content_type == "application/pdf" and not destination_blob_name.lower().endswith(".pdf"):
                         destination_blob_name += ".pdf"
 
                 # Upload to GCS
@@ -366,7 +337,7 @@ def upload_file_to_gcs(
                 # Generate a URL
                 try:
                     url = blob.public_url
-                except:
+                except Exception:
                     url = f"gs://{bucket_name}/{destination_blob_name}"
 
                 return {
@@ -390,13 +361,13 @@ def upload_file_to_gcs(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to upload file: {str(e)}",
+            "message": f"Failed to upload file: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 

@@ -1,5 +1,4 @@
-"""
-RAG Corpus Management Tools for Vertex AI using ADK function tools pattern.
+"""RAG Corpus Management Tools for Vertex AI using ADK function tools pattern.
 
 RAG Corpus Management:
 1. Create a new RAG corpus
@@ -16,12 +15,11 @@ RAG File Management (within a corpus):
 10. Query RAG files
 """
 
-from typing import Any, Dict, Optional
+import logging
+from typing import Any
 
 import vertexai
 from google.adk.tools import FunctionTool
-from vertexai.preview import rag
-
 from level_3.config import (
     LOCATION,
     PROJECT_ID,
@@ -31,6 +29,7 @@ from level_3.config import (
     RAG_DEFAULT_TOP_K,
     RAG_DEFAULT_VECTOR_DISTANCE_THRESHOLD,
 )
+from vertexai.preview import rag
 
 # Initialize Vertex AI API
 vertexai.init(project=PROJECT_ID, location=LOCATION)
@@ -38,11 +37,10 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 def create_rag_corpus(
     display_name: str,
-    description: Optional[str] = None,
-    embedding_model: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Creates a new RAG corpus in Vertex AI.
+    description: str | None = None,
+    embedding_model: str | None = None,
+) -> dict[str, Any]:
+    """Creates a new RAG corpus in Vertex AI.
 
     Args:
         display_name: A human-readable name for the corpus
@@ -61,9 +59,7 @@ def create_rag_corpus(
         embedding_model = RAG_DEFAULT_EMBEDDING_MODEL
     try:
         # Configure embedding model
-        embedding_model_config = rag.EmbeddingModelConfig(
-            publisher_model=f"publishers/google/models/{embedding_model}"
-        )
+        embedding_model_config = rag.EmbeddingModelConfig(publisher_model=f"publishers/google/models/{embedding_model}")
 
         # Create the corpus
         corpus = rag.create_corpus(
@@ -86,17 +82,16 @@ def create_rag_corpus(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to create RAG corpus: {str(e)}",
+            "message": f"Failed to create RAG corpus: {e!s}",
         }
 
 
 def update_rag_corpus(
     corpus_id: str,
-    display_name: Optional[str] = None,
-    description: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Updates an existing RAG corpus with new display name and/or description.
+    display_name: str | None = None,
+    description: str | None = None,
+) -> dict[str, Any]:
+    """Updates an existing RAG corpus with new display name and/or description.
 
     Args:
         corpus_id: The ID of the corpus to update
@@ -114,9 +109,7 @@ def update_rag_corpus(
     """
     try:
         # Construct full corpus name
-        corpus_name = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # Get the existing corpus
         corpus = rag.get_corpus(name=corpus_name)
@@ -128,9 +121,7 @@ def update_rag_corpus(
             corpus.description = description
 
         # Apply updates
-        updated_corpus = rag.update_corpus(
-            corpus=corpus, update_mask=["display_name", "description"]
-        )
+        updated_corpus = rag.update_corpus(corpus=corpus, update_mask=["display_name", "description"])
 
         return {
             "status": "success",
@@ -145,13 +136,12 @@ def update_rag_corpus(
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to update RAG corpus: {str(e)}",
+            "message": f"Failed to update RAG corpus: {e!s}",
         }
 
 
-def list_rag_corpora() -> Dict[str, Any]:
-    """
-    Lists all RAG corpora in the current project and location.
+def list_rag_corpora() -> dict[str, Any]:
+    """Lists all RAG corpora in the current project and location.
 
     Returns:
         A dictionary containing the list of corpora:
@@ -169,13 +159,9 @@ def list_rag_corpora() -> Dict[str, Any]:
 
             # Get corpus status
             status = None
-            if hasattr(corpus, "corpus_status") and hasattr(
-                corpus.corpus_status, "state"
-            ):
+            if hasattr(corpus, "corpus_status") and hasattr(corpus.corpus_status, "state"):
                 status = corpus.corpus_status.state
-            elif hasattr(corpus, "corpusStatus") and hasattr(
-                corpus.corpusStatus, "state"
-            ):
+            elif hasattr(corpus, "corpusStatus") and hasattr(corpus.corpusStatus, "state"):
                 status = corpus.corpusStatus.state
 
             # Make an explicit API call to count files
@@ -188,19 +174,15 @@ def list_rag_corpora() -> Dict[str, Any]:
                     files_count = len(files_response.rag_files)
             except Exception:
                 # If counting files fails, continue with zero count
-                pass
+                logging.info("Could not count files")
 
             corpus_list.append(
                 {
                     "id": corpus_id,
                     "name": corpus.name,
                     "display_name": corpus.display_name,
-                    "description": corpus.description
-                    if hasattr(corpus, "description")
-                    else None,
-                    "create_time": str(corpus.create_time)
-                    if hasattr(corpus, "create_time")
-                    else None,
+                    "description": corpus.description if hasattr(corpus, "description") else None,
+                    "create_time": str(corpus.create_time) if hasattr(corpus, "create_time") else None,
                     "files_count": files_count,
                     "status": status,
                 }
@@ -216,13 +198,12 @@ def list_rag_corpora() -> Dict[str, Any]:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to list RAG corpora: {str(e)}",
+            "message": f"Failed to list RAG corpora: {e!s}",
         }
 
 
-def get_rag_corpus(corpus_id: str) -> Dict[str, Any]:
-    """
-    Retrieves details of a specific RAG corpus.
+def get_rag_corpus(corpus_id: str) -> dict[str, Any]:
+    """Retrieves details of a specific RAG corpus.
 
     Args:
         corpus_id: The ID of the corpus to retrieve
@@ -236,9 +217,7 @@ def get_rag_corpus(corpus_id: str) -> Dict[str, Any]:
     """
     try:
         # Construct full corpus name
-        corpus_name = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # Get the corpus
         corpus = rag.get_corpus(name=corpus_name)
@@ -260,22 +239,16 @@ def get_rag_corpus(corpus_id: str) -> Dict[str, Any]:
                 files_count = len(files_response.rag_files)
         except Exception as file_error:
             # If counting files fails, log but continue with zero count
-            print(f"Warning: Could not count files: {str(file_error)}")
+            print(f"Warning: Could not count files: {file_error!s}")
 
         # Extract basic information
         corpus_details = {
             "id": corpus_id,
             "name": corpus.name,
             "display_name": corpus.display_name,
-            "description": corpus.description
-            if hasattr(corpus, "description")
-            else None,
-            "create_time": str(corpus.create_time)
-            if hasattr(corpus, "create_time")
-            else None,
-            "update_time": str(corpus.update_time)
-            if hasattr(corpus, "update_time")
-            else None,
+            "description": corpus.description if hasattr(corpus, "description") else None,
+            "create_time": str(corpus.create_time) if hasattr(corpus, "create_time") else None,
+            "update_time": str(corpus.update_time) if hasattr(corpus, "update_time") else None,
             "files_count": files_count,
             "state": status,
         }
@@ -285,9 +258,7 @@ def get_rag_corpus(corpus_id: str) -> Dict[str, Any]:
         if hasattr(corpus, "to_dict"):
             raw_data = corpus.to_dict()
         elif hasattr(corpus, "__dict__"):
-            raw_data = {
-                k: v for k, v in corpus.__dict__.items() if not k.startswith("_")
-            }
+            raw_data = {k: v for k, v in corpus.__dict__.items() if not k.startswith("_")}
 
         if raw_data:
             corpus_details["raw_api_data"] = raw_data
@@ -303,13 +274,12 @@ def get_rag_corpus(corpus_id: str) -> Dict[str, Any]:
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to retrieve RAG corpus: {str(e)}",
+            "message": f"Failed to retrieve RAG corpus: {e!s}",
         }
 
 
-def delete_rag_corpus(corpus_id: str) -> Dict[str, Any]:
-    """
-    Deletes a RAG corpus.
+def delete_rag_corpus(corpus_id: str) -> dict[str, Any]:
+    """Deletes a RAG corpus.
 
     Args:
         corpus_id: The ID of the corpus to delete
@@ -322,9 +292,7 @@ def delete_rag_corpus(corpus_id: str) -> Dict[str, Any]:
     """
     try:
         # Construct full corpus name
-        corpus_name = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # Delete the corpus
         rag.delete_corpus(name=corpus_name)
@@ -339,14 +307,14 @@ def delete_rag_corpus(corpus_id: str) -> Dict[str, Any]:
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to delete RAG corpus: {str(e)}",
+            "message": f"Failed to delete RAG corpus: {e!s}",
         }
 
 
 # Function for importing documents into a RAG corpus
-def import_document_to_corpus(corpus_id: str, gcs_uri: str) -> Dict[str, Any]:
-    """
-    Imports a document from Google Cloud Storage into a RAG corpus.
+def import_document_to_corpus(corpus_id: str, gcs_uri: str) -> dict[str, Any]:
+    """Imports a document from Google Cloud Storage into a RAG corpus.
+
     Uses the minimal required parameters to avoid any compatibility issues.
 
     Args:
@@ -361,16 +329,11 @@ def import_document_to_corpus(corpus_id: str, gcs_uri: str) -> Dict[str, Any]:
     """
     try:
         # Construct full corpus name
-        corpus_name = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # Import document with minimal configuration
         # Use the most basic form of the API call to avoid parameter issues
-        result = rag.import_files(
-            corpus_name,
-            [gcs_uri],  # Single path in a list
-        )
+        rag.import_files(corpus_name, [gcs_uri])
 
         # Return success result
         return {
@@ -383,18 +346,15 @@ def import_document_to_corpus(corpus_id: str, gcs_uri: str) -> Dict[str, Any]:
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to import document: {str(e)}",
+            "message": f"Failed to import document: {e!s}",
         }
 
 
 # RAG File Management Functions
 
 
-def list_rag_files(
-    corpus_id: str, page_size: Optional[int] = None, page_token: Optional[str] = None
-) -> Dict[str, Any]:
-    """
-    Lists all RAG files in a corpus.
+def list_rag_files(corpus_id: str, page_size: int | None = None, page_token: str | None = None) -> dict[str, Any]:
+    """Lists all RAG files in a corpus.
 
     Args:
         corpus_id: The ID of the corpus to list files from
@@ -414,14 +374,10 @@ def list_rag_files(
         page_size = RAG_DEFAULT_PAGE_SIZE
     try:
         # Construct full corpus name
-        corpus_name = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # List files
-        response = rag.list_files(
-            corpus_name=corpus_name, page_size=page_size, page_token=page_token
-        )
+        response = rag.list_files(corpus_name=corpus_name, page_size=page_size, page_token=page_token)
 
         # Process files
         files = []
@@ -431,21 +387,11 @@ def list_rag_files(
                 {
                     "id": file_id,
                     "name": file.name,
-                    "display_name": file.display_name
-                    if hasattr(file, "display_name")
-                    else None,
-                    "description": file.description
-                    if hasattr(file, "description")
-                    else None,
-                    "source_uri": file.source_uri
-                    if hasattr(file, "source_uri")
-                    else None,
-                    "create_time": str(file.create_time)
-                    if hasattr(file, "create_time")
-                    else None,
-                    "update_time": str(file.update_time)
-                    if hasattr(file, "update_time")
-                    else None,
+                    "display_name": file.display_name if hasattr(file, "display_name") else None,
+                    "description": file.description if hasattr(file, "description") else None,
+                    "source_uri": file.source_uri if hasattr(file, "source_uri") else None,
+                    "create_time": str(file.create_time) if hasattr(file, "create_time") else None,
+                    "update_time": str(file.update_time) if hasattr(file, "update_time") else None,
                 }
             )
 
@@ -454,9 +400,7 @@ def list_rag_files(
             "corpus_id": corpus_id,
             "files": files,
             "count": len(files),
-            "next_page_token": response.next_page_token
-            if hasattr(response, "next_page_token")
-            else None,
+            "next_page_token": response.next_page_token if hasattr(response, "next_page_token") else None,
             "message": f"Found {len(files)} file(s) in corpus '{corpus_id}'",
         }
     except Exception as e:
@@ -464,13 +408,12 @@ def list_rag_files(
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to list files: {str(e)}",
+            "message": f"Failed to list files: {e!s}",
         }
 
 
-def get_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
-    """
-    Gets details of a specific RAG file in a corpus.
+def get_rag_file(corpus_id: str, file_id: str) -> dict[str, Any]:
+    """Gets details of a specific RAG file in a corpus.
 
     Args:
         corpus_id: The ID of the corpus
@@ -494,17 +437,11 @@ def get_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
         file_details = {
             "id": file_id,
             "name": file.name,
-            "display_name": file.display_name
-            if hasattr(file, "display_name")
-            else None,
+            "display_name": file.display_name if hasattr(file, "display_name") else None,
             "description": file.description if hasattr(file, "description") else None,
             "source_uri": file.source_uri if hasattr(file, "source_uri") else None,
-            "create_time": str(file.create_time)
-            if hasattr(file, "create_time")
-            else None,
-            "update_time": str(file.update_time)
-            if hasattr(file, "update_time")
-            else None,
+            "create_time": str(file.create_time) if hasattr(file, "create_time") else None,
+            "update_time": str(file.update_time) if hasattr(file, "update_time") else None,
         }
 
         # Include raw API response data for transparency
@@ -529,13 +466,12 @@ def get_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
             "corpus_id": corpus_id,
             "file_id": file_id,
             "error_message": str(e),
-            "message": f"Failed to retrieve file: {str(e)}",
+            "message": f"Failed to retrieve file: {e!s}",
         }
 
 
-def delete_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
-    """
-    Deletes a RAG file from a corpus.
+def delete_rag_file(corpus_id: str, file_id: str) -> dict[str, Any]:
+    """Deletes a RAG file from a corpus.
 
     Args:
         corpus_id: The ID of the corpus
@@ -567,7 +503,7 @@ def delete_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
             "corpus_id": corpus_id,
             "file_id": file_id,
             "error_message": str(e),
-            "message": f"Failed to delete file: {str(e)}",
+            "message": f"Failed to delete file: {e!s}",
         }
 
 
@@ -575,11 +511,10 @@ def delete_rag_file(corpus_id: str, file_id: str) -> Dict[str, Any]:
 def query_rag_corpus(
     corpus_id: str,
     query_text: str,
-    top_k: Optional[int] = None,
-    vector_distance_threshold: Optional[float] = None,
-) -> Dict[str, Any]:
-    """
-    Directly queries a RAG corpus using the Vertex AI RAG API.
+    top_k: int | None = None,
+    vector_distance_threshold: float | None = None,
+) -> dict[str, Any]:
+    """Directly queries a RAG corpus using the Vertex AI RAG API.
 
     Args:
         corpus_id: The ID of the corpus to query
@@ -596,9 +531,7 @@ def query_rag_corpus(
         vector_distance_threshold = RAG_DEFAULT_VECTOR_DISTANCE_THRESHOLD
     try:
         # Construct full corpus resource path
-        corpus_path = (
-            f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
-        )
+        corpus_path = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{corpus_id}"
 
         # Create the resource config
         rag_resource = rag.RagResource(rag_corpus=corpus_path)
@@ -606,9 +539,7 @@ def query_rag_corpus(
         # Configure retrieval parameters
         retrieval_config = rag.RagRetrievalConfig(
             top_k=top_k,
-            filter=rag.utils.resources.Filter(
-                vector_distance_threshold=vector_distance_threshold
-            ),
+            filter=rag.utils.resources.Filter(vector_distance_threshold=vector_distance_threshold),
         )
 
         # Execute the query directly using the API
@@ -630,12 +561,8 @@ def query_rag_corpus(
             for context in contexts:
                 result = {
                     "text": context.text if hasattr(context, "text") else "",
-                    "source_uri": context.source_uri
-                    if hasattr(context, "source_uri")
-                    else None,
-                    "relevance_score": context.relevance_score
-                    if hasattr(context, "relevance_score")
-                    else None,
+                    "source_uri": context.source_uri if hasattr(context, "source_uri") else None,
+                    "relevance_score": context.relevance_score if hasattr(context, "relevance_score") else None,
                 }
                 results.append(result)
 
@@ -653,18 +580,18 @@ def query_rag_corpus(
             "status": "error",
             "corpus_id": corpus_id,
             "error_message": str(e),
-            "message": f"Failed to query corpus: {str(e)}",
+            "message": f"Failed to query corpus: {e!s}",
         }
 
 
 # Function to search across all corpora
 def search_all_corpora(
     query_text: str,
-    top_k_per_corpus: Optional[int] = None,
-    vector_distance_threshold: Optional[float] = None,
-) -> Dict[str, Any]:
-    """
-    Searches across ALL available corpora for the given query text.
+    top_k_per_corpus: int | None = None,
+    vector_distance_threshold: float | None = None,
+) -> dict[str, Any]:
+    """Searches across ALL available corpora for the given query text.
+
     When a user wants to search for information without specifying a corpus,
     this is the default tool to use.
 
@@ -725,13 +652,9 @@ def search_all_corpora(
                     result["citation"] = f"[Source: {corpus_name} ({corpus_id})]"
 
                     # Add source file information if available
-                    if "source_uri" in result and result["source_uri"]:
+                    if result.get("source_uri"):
                         source_path = result["source_uri"]
-                        file_name = (
-                            source_path.split("/")[-1]
-                            if "/" in source_path
-                            else source_path
-                        )
+                        file_name = source_path.split("/")[-1] if "/" in source_path else source_path
                         result["citation"] += f" File: {file_name}"
 
                     corpus_specific_results.append(result)
@@ -749,9 +672,7 @@ def search_all_corpora(
 
         # Sort all results by relevance score (if available)
         all_results.sort(
-            key=lambda x: x.get("relevance_score", 0)
-            if x.get("relevance_score") is not None
-            else 0,
+            key=lambda x: x.get("relevance_score", 0) if x.get("relevance_score") is not None else 0,
             reverse=True,
         )
 
@@ -759,9 +680,7 @@ def search_all_corpora(
         citations_summary = []
         for corpus_name in searched_corpora:
             corpus_data = corpus_results_map[corpus_name]
-            citations_summary.append(
-                f"{corpus_name} ({corpus_data['corpus_id']}): {corpus_data['count']} results"
-            )
+            citations_summary.append(f"{corpus_name} ({corpus_data['corpus_id']}): {corpus_data['count']} results")
 
         return {
             "status": "success",
@@ -771,7 +690,7 @@ def search_all_corpora(
             "citations_summary": citations_summary,
             "count": len(all_results),
             "query": query_text,
-            "message": f"Found {len(all_results)} results for query '{query_text}' across {len(searched_corpora)} corpora",
+            "message": f"Found {len(all_results)} results across {len(searched_corpora)} corpora",
             "citation_note": "Each result includes a citation indicating its source corpus and file.",
         }
 
@@ -779,7 +698,7 @@ def search_all_corpora(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to search all corpora: {str(e)}",
+            "message": f"Failed to search all corpora: {e!s}",
         }
 
 

@@ -1,3 +1,5 @@
+"""Level 4: Knowledge + RAG + Reasoning."""
+
 from google.adk.agents.llm_agent import Agent
 
 from level_4.tools import run_python_code
@@ -7,7 +9,7 @@ developer = Agent(
     model="gemini-2.5-flash",
     description="A developer who is responsible for implementing the {product_features} using Python.",
     instruction="""
-    Implement the product features using Python. 
+    Implement the product features using Python.
     You only write functions and classes that are related to the product features.
     You can use the run_python_code tool to check syntax errors.
     You never write infinite loops.

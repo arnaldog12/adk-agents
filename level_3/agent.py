@@ -1,3 +1,5 @@
+"""Level 3: Knowledge + RAG + Reasoning."""
+
 from google.adk.agents import Agent
 from google.adk.planners.built_in_planner import BuiltInPlanner
 from google.adk.tools.load_memory_tool import load_memory_tool
@@ -10,14 +12,14 @@ agent = Agent(
     name="level_3",
     model="gemini-2.5-flash",
     # ----- SHOW HOW THE PLANNER REDUCES PROMPT LENGTH (ERASE FROM LINE 26 TO 52) -----
-    planner=BuiltInPlanner(
-        thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)
-    ),
+    planner=BuiltInPlanner(thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)),
     description="Agent for managing and searching Vertex AI RAG corpora and GCS buckets",
     instruction="""
     You are a helpful assistant that manages and searches RAG corpora in Vertex AI and Google Cloud Storage buckets.
 
-    Your primary goal is to understand the user's intent and select the most appropriate tool to help them accomplish their tasks. Focus on what the user wants to do rather than specific tools.
+    Your primary goal is to understand the user's intent
+      and select the most appropriate tool to help them accomplish their tasks.
+    Focus on what the user wants to do rather than specific tools.
 
     You can help users with these main types of tasks:
 
@@ -43,8 +45,11 @@ agent = Agent(
         - You can find citation information in each result's "citation" field
         - At the end of all results, include a Citations section with the citation_summary information
 
-    - For any GCS operation (upload, list, delete, etc.), always include the gs://<bucket-name>/<file> URI in your response to the user. When creating, listing, or deleting items (buckets, files, corpora, etc.), display each as a bulleted list, one per line, using the appropriate emoji (ℹ️ for buckets and info, 🗂️ for files, etc.). For example, when listing GCS buckets:
-      - 🗂️ gs://bucket-name/
+    - For any GCS operation, always include the gs://<bucket-name>/<file> URI in your response to the user.
+      When creating, listing, or deleting items (buckets, files, corpora, etc.), display each as a bulleted list,
+        one per line, using the appropriate emoji (ℹ️ for buckets and info, 🗂️ for files, etc.).
+        For example, when listing GCS buckets:
+        - 🗂️ gs://bucket-name/
 
     Use emojis and markdown formatting to make responses more friendly and readable.
     """,

@@ -1,3 +1,5 @@
+"""Level 3 Agent Configuration."""
+
 import os
 
 from dotenv import load_dotenv
@@ -15,7 +17,7 @@ GCS_LIST_BLOBS_MAX_RESULTS = 100
 GCS_DEFAULT_CONTENT_TYPE = "application/pdf"
 
 # RAG Corpus Settings
-RAG_DEFAULT_EMBEDDING_MODEL = "text-embedding-004"
+RAG_DEFAULT_EMBEDDING_MODEL = "text-embedding-005"
 RAG_DEFAULT_TOP_K = 10  # Default number of results for single corpus query
 RAG_DEFAULT_SEARCH_TOP_K = 5  # Default number of results per corpus for search_all
 RAG_DEFAULT_VECTOR_DISTANCE_THRESHOLD = 0.5

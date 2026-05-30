@@ -1,9 +1,12 @@
+"""Level 4 Agent Tools."""
+
 import sys
 from io import StringIO
-from typing import Any, Dict
+from typing import Any
 
 
-def run_python_code(code: str) -> Dict[str, Any]:
+def run_python_code(code: str) -> dict[str, Any]:
+    """Run Python code."""
     stdout_capture = StringIO()
     stderr_capture = StringIO()
 
@@ -25,13 +28,13 @@ def run_python_code(code: str) -> Dict[str, Any]:
         local_vars = {}
         exec(code, {"__builtins__": __builtins__}, local_vars)
 
-        result["output"] = local_vars.get("result", None)
+        result["output"] = local_vars.get("result")
         result["stdout"] = stdout_capture.getvalue()
         result["stderr"] = stderr_capture.getvalue()
 
     except Exception as e:
         result["status"] = "error"
-        result["error"] = f"{type(e).__name__}: {str(e)}"
+        result["error"] = f"{type(e).__name__}: {e!s}"
         result["stderr"] = stderr_capture.getvalue()
 
     finally:

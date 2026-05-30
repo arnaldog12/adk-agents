@@ -1,3 +1,5 @@
+"""Level 1: Agent + Tools + MCP - NL2SQL."""
+
 from google.adk.agents.llm_agent import Agent
 
 from level_1.prompt import agent_instruction
