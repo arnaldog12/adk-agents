@@ -8,8 +8,30 @@ source .venv/bin/activate
 cp .env.example .env
 
 gcloud auth login
+gcloud auth application-default login
 gcloud config set project ${GOOGLE_CLOUD_PROJECT}
-# enable vertexai and storage api
+```
+
+**Google Cloud Console — required setup:**
+
+1. [Create an API Key][api-key] and add it to your `.env` file.
+2. Create a GCS bucket and use this name when talking to Level 3 Agent.
+3. Enable the following APIs:
+   - Billing (and link a billing account)
+   - Vertex AI API
+   - Cloud Storage API
+   - Agent Platform API
+   - Cloud Resource Manager API
+   - Vector Search API
+4. In the [RAG Engine console][rag-engine], switch the RAG Engine to **serverless mode**.
+
+**Memory service (Level 2):**
+
+Run the script below once to provision the memory service on Agent Engine:
+
+```sh
+python memory_bank.py
+```
 
 ## 🐳 1. Start the Database and Toolbox Services
 
@@ -27,7 +49,9 @@ Change the environment variables in the `.env` file to your own.
 ## 🚀 3. Running
 
 ```bash
-dk web --session_service_uri "sqlite:///./google_adk_agents.db" --memory_service_uri "agentengine://3732274628299587584"
+adk web --session_service_uri "sqlite:///./google_adk_agents.db" --memory_service_uri "agentengine://projects/294505191812/locations/us-central1/reasoningEngines/611885367682924544"
+
+
 ```
 ### 🧰 Level 1 (Agent + Tools + MCP - NL2SQL)
 
@@ -44,7 +68,7 @@ A bug ticket triage and debugging assistant for **QuantumRoast**, a coffee machi
 - `"Create a new ticket: the espresso machine is overheating after 5 minutes of use"`
 - `"Find tickets similar to 'grinder motor failure'"`
 - `"What tickets were created in the last week?"`
-- `"Update ticket #42 status to 'In Progress'"`
+- `"Update ticket #1 status to 'In Progress'"`
 - `"Search the web for known issues with coffee machine temperature sensors"`
 
 ---
@@ -80,10 +104,11 @@ A **RAG (Retrieval Augmented Generation)** management agent for Vertex AI and Go
 **Example messages:**
 - `"List all my RAG corpora"`
 - `"Create a new corpus called 'product-docs'"`
-- `"Upload the file 'manual.pdf' to the 'documents' bucket"`
-- `"Import gs://my-bucket/docs/ into corpus 'product-docs'"`
-- `"Search all corpora for 'how to reset the device'"`
-- `"What files are in the 'knowledge-base' corpus?"`
+- `"faz upload desse documento para um bucket chamado "arnaldo-bucket"`
+- `"faça upload desse documento no corpora"`
+- `"qual a data da minha viagem?"`
+- `"qual o preço total?"`
+- `"qual o endereço do hotel?"`
 - `"Delete corpus 'old-data'"`
 
 ---
@@ -109,3 +134,6 @@ A **multi-agent system** simulating a software development team with a Product M
 - `"I need a class to manage a todo list with add, remove, and list methods"`
 - `"Write a function to convert temperatures between Celsius and Fahrenheit"`
 - `"Build a simple password generator"`
+
+[api-key]: https://aistudio.google.com/app/api-keys
+[rag-engine]: https://console.cloud.google.com/agent-platform/rag/corpus
