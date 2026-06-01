@@ -103,9 +103,11 @@ A **RAG (Retrieval Augmented Generation)** management agent for Vertex AI and Go
 
 **Example messages:**
 - `"List all my RAG corpora"`
+- `"List all my buckets"`
 - `"Create a new corpus called 'product-docs'"`
 - `"faz upload desse documento para um bucket chamado "arnaldo-bucket"`
 - `"faça upload desse documento no corpora"`
+- `"quais arquivos tem no meu corpora?"`
 - `"qual a data da minha viagem?"`
 - `"qual o preço total?"`
 - `"qual o endereço do hotel?"`
