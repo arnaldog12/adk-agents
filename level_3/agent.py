@@ -11,7 +11,6 @@ from level_3.tools import corpus_tools, storage_tools
 agent = Agent(
     name="level_3",
     model="gemini-2.5-flash",
-    # ----- SHOW HOW THE PLANNER REDUCES PROMPT LENGTH (ERASE FROM LINE 26 TO 52) -----
     planner=BuiltInPlanner(thinking_config=ThinkingConfig(include_thoughts=False, thinking_budget=-1)),
     description="Agent for managing and searching Vertex AI RAG corpora and GCS buckets",
     instruction="""
